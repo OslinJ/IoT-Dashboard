@@ -78,7 +78,7 @@
 
     async function toggleDevice(id) {
         await fetch(`${API_URL}/${id}/toggle`, { method: "POST" });
-        fetchDevices();
+        await fetchDevices();
     }
 
     fetchDevices();
