@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>IoT Device Dashboard</title>
+    <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    />
+    <script
+            src="https://kit.fontawesome.com/a076d05399.js"
+            crossorigin="anonymous"
+    ></script>
+    <style>
+        body {
+            padding: 2rem;
+            background-color: #f8f9fa;
+        }
+        .status-icon {
+            font-size: 1.2rem;
+        }
+        .active {
+            color: green;
+        }
+        .inactive {
+            color: gray;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 class="mb-4 text-primary">IoT Device Dashboard</h1>
+    <table class="table table-bordered table-hover">
+        <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Value</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody id="deviceTable"></tbody>
+    </table>
+</div>
+
+<script>
+    const API_URL = "/api/devices";
+
+    async function fetchDevices() {
+        const response = await fetch(API_URL);
+        const devices = await response.json();
+        const tbody = document.getElementById("deviceTable");
+        tbody.innerHTML = "";
+
+        devices.forEach(device => {
+            const row = document.createElement("tr");
+
+            const statusIcon = device.active
+                ? `<i class="fas fa-check-circle active status-icon"></i> Active`
+                : `<i class="fas fa-times-circle inactive status-icon"></i> Inactive`;
+
+            row.innerHTML = `
+          <td>${device.id}</td>
+          <td>${device.name}</td>
+          <td>${statusIcon}</td>
+          <td><span class="badge bg-info text-dark">${device.currentValue.toFixed(2)}</span></td>
+          <td>
+            <button class="btn btn-sm btn-outline-primary" onclick="toggleDevice(${device.id})">
+              Toggle
+            </button>
+          </td>
+        `;
+
+            tbody.appendChild(row);
+        });
+    }
+
+    async function toggleDevice(id) {
+        await fetch(`${API_URL}/${id}/toggle`, { method: "POST" });
+        fetchDevices();
+    }
+
+    fetchDevices();
+    setInterval(fetchDevices, 3000);
+</script>
+</body>
+</html>
